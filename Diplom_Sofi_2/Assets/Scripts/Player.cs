@@ -1,0 +1,170 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
+
+/// <summary>
+/// Класс представляющий логику игрока
+/// </summary>
+public class Player : NetworkBehaviour
+{
+    private static bool turn = false;
+
+    [SerializeField] GameObject inputPrefab;
+    [SerializeField] GameObject playerPref;
+
+    private Transform player;
+    private SpriteRenderer playerRender;
+    private InputsController input;
+    private InputsController otherInput;
+    private MapController mapController;
+    private int id;
+
+    private Vector2Int currentPos;
+    private Vector2Int serverCurrentPos;
+    private bool isUpdatePos = false;
+
+    /// <summary>
+    /// Создание игрока на сцене
+    /// </summary>
+    public void CreatePlayer(Vector3 pos, Vector3 inputPos, int _id)
+    {
+        mapController = GetComponent<MapController>();
+        player = Instantiate(playerPref, pos, Quaternion.identity, transform).transform;
+        playerRender = player.GetComponent<SpriteRenderer>();
+        Transform canvas = GameObject.Find("Canvas").transform;
+        input = Instantiate(inputPrefab, inputPos, Quaternion.identity, canvas).GetComponent<InputsController>();
+        id = _id;
+
+        if (isLocalPlayer) {
+            currentPos = mapController.beginPoint;
+            CmdStep(mapController.beginPoint.x, mapController.beginPoint.y);
+        }
+    }
+
+    /// <summary>
+    /// Метод выполняющийся каждый кадр
+    /// Считывает ввод и выполняет логику хода
+    /// </summary>
+    private void Update()
+    {
+        // color changing
+        if (playerRender != null) {
+            if (CalculateTurn()) {
+                playerRender.color = Color.green;
+            }
+            else {
+                playerRender.color = Color.red;
+            }
+        }
+
+        // steping
+        if (isServer) {
+            if (isUpdatePos) {
+                isUpdatePos = false;
+                RpcStepAll(serverCurrentPos.x, serverCurrentPos.y, turn);
+            }
+        }
+
+        // input logic
+        if (isLocalPlayer) {
+            if (input != null && CalculateTurn()) {
+                if (input.Up) {
+                    Step(Vector2Int.up);
+                }
+                else if (input.Left) {
+                    Step(Vector2Int.left);
+                }
+                else if (input.Down) {
+                    Step(Vector2Int.down);
+                }
+                else if (input.Right) {
+                    Step(Vector2Int.right);
+                }
+            }
+        }
+
+        // hand input
+        if (isClient) {
+            if (input != null && GetPromt()) {
+                if (input.Up) {
+                    Debug.Log("Up");
+                }
+                else if (input.Left) {
+                    Debug.Log("Left");
+                }
+                else if (input.Down) {
+                    Debug.Log("Down");
+                }
+                else if (input.Right) {
+                    Debug.Log("Right");
+                }
+            }
+        }
+    }
+
+    #region Step by Step
+    /// <summary>
+    /// Метод выполняющий ход игрока в заданом направлении
+    /// </summary>
+    private void Step(Vector2Int dir)
+    {
+        if (CanPass(dir)) {
+            currentPos += dir;
+        }
+        else {
+            Debug.Log("Cant Pass");
+        }
+
+        CmdStep(currentPos.x, currentPos.y);
+    }
+
+    [Command]
+    private void CmdStep(int x, int y)
+    {
+        isUpdatePos = true;
+        serverCurrentPos = new Vector2Int(x, y);
+
+        turn = !turn;
+    }
+
+    [ClientRpc]
+    private void RpcStepAll(int x, int y, bool _turn)
+    {
+        player.position = mapController.Map[y, x].position;
+        turn = _turn;
+    }
+
+    /// <summary>
+    /// Проверка может ли игрок походить в выбраном направлении
+    /// </summary>
+    private bool CanPass(Vector2Int dir)
+    {
+        TypeDir type = Helper.ConvertVectorToDir(dir);
+        Vector2Int nextPos = currentPos + dir;
+        if (nextPos.y >= 0 && nextPos.y < mapController.Map.GetLength(0) && nextPos.x >= 0 && nextPos.x < mapController.Map.GetLength(1)) {
+            return mapController.Map[currentPos.y, currentPos.x].walls[type] == 0;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Определение может ли игрок ходить в данный момент
+    /// </summary>
+    private bool CalculateTurn()
+    {
+        return (turn && id == 0) || (!turn && id == 1);
+    }
+    #endregion
+
+    #region Trust or Not
+
+
+    private bool GetPromt()
+    {
+        return (!turn && id == 0) || (turn && id == 1);
+    }
+    #endregion
+}
