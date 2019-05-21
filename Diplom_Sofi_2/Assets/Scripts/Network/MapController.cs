@@ -22,6 +22,7 @@ public class MapController : NetworkBehaviour
     public Vector2Int endPoint;
 
     private List<GameObject> cells = new List<GameObject>();
+    private List<GameObject> closeTiles = new List<GameObject>();
 
     public int id;
     private static int nextId = 0;
@@ -95,6 +96,9 @@ public class MapController : NetworkBehaviour
         GetComponent<Player>().CreatePlayer(startPos, new Vector3(contrX, contrY, 0), id);
 
         VizualizeMaze();
+
+        if (isLocalPlayer)
+            CloseMaze();
     }
 
     /// <summary>
@@ -121,6 +125,7 @@ public class MapController : NetworkBehaviour
                     if (wall.Value != 0) {
 
                         var sprRend = new GameObject().AddComponent<SpriteRenderer>();
+                        sprRend.gameObject.name = $"tile-{y}-{x}";
                         sprRend.sprite = info.sprites.Find(val => val.dir == wall.Key).sprite;
 
                         sprRend.transform.position = Map[y, x].position;
@@ -130,6 +135,33 @@ public class MapController : NetworkBehaviour
                 }
             }
         }
+    }
+
+    private void CloseMaze()
+    {
+        //clen up
+        for (int i = 0; i < closeTiles.Count; i++) {
+            Destroy(closeTiles[i]);
+        }
+        closeTiles.Clear();
+
+        //vizualize
+        int h = Map.GetLength(0);
+        int w = Map.GetLength(1);
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                GameObject go = Instantiate(info.closeTile, Map[y, x].position, Quaternion.identity, transform);
+                go.name = $"closeTile-{y}-{x}";
+                Map[y, x].CloseTile = go;
+                closeTiles.Add(go);
+            }
+        }
+    }
+
+    private void VizualizeTrueWay()
+    {
+
     }
     #endregion
 }

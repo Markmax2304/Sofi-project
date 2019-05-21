@@ -17,6 +17,8 @@ public class Cell
 
     public Vector3 position { get; set; }
 
+    public GameObject CloseTile { get; set; }
+
     /// <summary>
     /// Конструктор создания клетки по величинам всех стен
     /// </summary>
@@ -46,5 +48,10 @@ public class Cell
     public void SetWall(TypeDir dir, int value)
     {
         walls[dir] = value;
+    }
+
+    public void OpenTile()
+    {
+        CloseTile.gameObject.SetActive(false);
     }
 }

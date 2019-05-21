@@ -11,7 +11,7 @@ public class MapInfo : ScriptableObject
     [Range(0, 99)]
     public int endUpPercent = 50;
     [Space]
-    public GameObject mapControllerPref;
+    public GameObject closeTile;
 
     [Space, Header("Dont touch! Dir name must equals name sprite!")]
     public List<SpriteImage> sprites;

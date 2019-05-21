@@ -17,13 +17,17 @@ public class Player : NetworkBehaviour
     private Transform player;
     private SpriteRenderer playerRender;
     private InputsController input;
-    private InputsController otherInput;
     private MapController mapController;
-    private int id;
+    public int id;
 
     private Vector2Int currentPos;
     private Vector2Int serverCurrentPos;
     private bool isUpdatePos = false;
+
+    private void Awake()
+    {
+        id = -1;
+    }
 
     /// <summary>
     /// Создание игрока на сцене
@@ -39,6 +43,7 @@ public class Player : NetworkBehaviour
 
         if (isLocalPlayer) {
             currentPos = mapController.beginPoint;
+            mapController.Map[currentPos.y, currentPos.x].OpenTile();
             CmdStep(mapController.beginPoint.x, mapController.beginPoint.y);
         }
     }
@@ -87,18 +92,18 @@ public class Player : NetworkBehaviour
 
         // hand input
         if (isClient) {
-            if (input != null && GetPromt()) {
+            if (input != null && CalculateTurn()) {
                 if (input.Up) {
-                    Debug.Log("Up");
+                    CmdSetHandButton(TypeDir.Top);
                 }
                 else if (input.Left) {
-                    Debug.Log("Left");
+                    CmdSetHandButton(TypeDir.Left);
                 }
                 else if (input.Down) {
-                    Debug.Log("Down");
+                    CmdSetHandButton(TypeDir.Below);
                 }
                 else if (input.Right) {
-                    Debug.Log("Right");
+                    CmdSetHandButton(TypeDir.Right);
                 }
             }
         }
@@ -117,6 +122,7 @@ public class Player : NetworkBehaviour
             Debug.Log("Cant Pass");
         }
 
+        mapController.Map[currentPos.y, currentPos.x].OpenTile();
         CmdStep(currentPos.x, currentPos.y);
     }
 
@@ -160,11 +166,16 @@ public class Player : NetworkBehaviour
     #endregion
 
     #region Trust or Not
-
-
-    private bool GetPromt()
+    [Command]
+    private void CmdSetHandButton(TypeDir dir)
     {
-        return (!turn && id == 0) || (turn && id == 1);
+        RpcSetHandButton(dir);
+    }
+
+    [ClientRpc]
+    private void RpcSetHandButton(TypeDir dir)
+    {
+        input.SetDirectionButton(dir);
     }
     #endregion
 }

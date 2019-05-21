@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 667592879051312887}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -81,6 +81,7 @@ MonoBehaviour:
   info: {fileID: 11400000, guid: c7da5eca6076f0e4fbc610220aca4ec2, type: 2}
   beginPoint: {x: 0, y: 0}
   endPoint: {x: 0, y: 0}
+  id: 0
 --- !u!114 &667592879051312887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,3 +98,5 @@ MonoBehaviour:
     type: 3}
   playerPref: {fileID: 5571232037950712330, guid: 3d7666ab22608384bb344b3ec4c5509a,
     type: 3}
+  other: {fileID: 0}
+  id: 0

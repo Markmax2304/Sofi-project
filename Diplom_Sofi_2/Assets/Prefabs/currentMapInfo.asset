@@ -15,7 +15,7 @@ MonoBehaviour:
   height: 20
   width: 15
   endUpPercent: 50
-  mapControllerPref: {fileID: 667592879051312886, guid: 787884ad7a3766e409be75fe47d1d6c6,
+  closeTile: {fileID: 6392337253258841191, guid: bfc965abd6196514785e2ee2290b5b27,
     type: 3}
   sprites:
   - dir: 4
