@@ -13,6 +13,7 @@ public class Player : NetworkBehaviour
 
     [SerializeField] GameObject inputPrefab;
     [SerializeField] GameObject playerPref;
+    [SerializeField] GameObject victoryPref;
 
     private Transform player;
     private SpriteRenderer playerRender;
@@ -123,6 +124,12 @@ public class Player : NetworkBehaviour
         }
 
         mapController.Map[currentPos.y, currentPos.x].OpenTile();
+
+        if(currentPos == mapController.endPoint) {
+            Transform canvas = GameObject.Find("Canvas").transform;
+            Instantiate(victoryPref, new Vector3(512, 384, 0), Quaternion.identity, canvas);
+        }
+
         CmdStep(currentPos.x, currentPos.y);
     }
 

@@ -12,6 +12,8 @@ public class MapInfo : ScriptableObject
     public int endUpPercent = 50;
     [Space]
     public GameObject closeTile;
+    [Space]
+    public GameObject line;
 
     [Space, Header("Dont touch! Dir name must equals name sprite!")]
     public List<SpriteImage> sprites;

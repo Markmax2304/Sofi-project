@@ -23,6 +23,7 @@ public class MapController : NetworkBehaviour
 
     private List<GameObject> cells = new List<GameObject>();
     private List<GameObject> closeTiles = new List<GameObject>();
+    private List<GameObject> lineWay = new List<GameObject>();
 
     public int id;
     private static int nextId = 0;
@@ -92,13 +93,16 @@ public class MapController : NetworkBehaviour
         Map = MazeGenerator.Generate(seed, info.height, info.width, info.endUpPercent);
         MazeGenerator.SetBeginEnd(Map, out beginPoint, out endPoint);
 
-        Vector3 startPos = new Vector3(-Map.GetLength(1) / 2f + .5f, -Map.GetLength(0) / 2f + .5f, 0) + transform.position;
-        GetComponent<Player>().CreatePlayer(startPos, new Vector3(contrX, contrY, 0), id);
-
         VizualizeMaze();
 
         if (isLocalPlayer)
             CloseMaze();
+
+        if (!isLocalPlayer)
+            VizualizeTrueWay();
+
+        Vector3 startPos = new Vector3(-Map.GetLength(1) / 2f + .5f, -Map.GetLength(0) / 2f + .5f, 0) + transform.position;
+        GetComponent<Player>().CreatePlayer(startPos, new Vector3(contrX, contrY, 0), id);
     }
 
     /// <summary>
@@ -161,7 +165,35 @@ public class MapController : NetworkBehaviour
 
     private void VizualizeTrueWay()
     {
+        //clen up
+        for (int i = 0; i < lineWay.Count; i++) {
+            Destroy(lineWay[i]);
+        }
+        lineWay.Clear();
 
+        //vizualize
+        List<Vector2Int> way = MazeGenerator.CalculateTrueWayInMaze(Map, beginPoint, endPoint);
+        for(int i = 0; i < way.Count - 1; i++) {
+            Cell begin = Map[way[i].y, way[i].x];
+            Cell end = Map[way[i + 1].y, way[i + 1].x];
+            Vector3 position = (begin.position + end.position)/ 2f;
+            Quaternion rotate = CalculateRotation(end.position - begin.position);
+            GameObject go = Instantiate(info.line, position, rotate, transform);
+            go.name = $"line-{i}";
+            lineWay.Add(go);
+        }
+    }
+
+    private Quaternion CalculateRotation(Vector3 direction)
+    {
+        if(direction.x == 0 && direction.y != 0) {
+            return Quaternion.identity;
+        }
+        else if(direction.y == 0 && direction.x != 0) {
+            return Quaternion.Euler(0, 0, 90);
+        }
+
+        return Quaternion.identity;
     }
     #endregion
 }

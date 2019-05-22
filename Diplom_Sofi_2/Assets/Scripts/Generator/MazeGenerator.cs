@@ -150,4 +150,94 @@ public static class MazeGenerator
         }
     }
     #endregion
+
+    #region True Way
+    public static List<Vector2Int> CalculateTrueWayInMaze(Cell[,] map, Vector2Int beginPoint, Vector2Int endPoint)
+    {
+        int[,] ways = new int[map.GetLength(0), map.GetLength(1)];
+        ways[beginPoint.y, beginPoint.x] = 1;
+
+        Queue<Vector2Int> cells = new Queue<Vector2Int>();
+        cells.Enqueue(beginPoint);
+
+        int count = cells.Count;
+        while (count-- > 0) {
+            Vector2Int pos = cells.Dequeue();
+            List<Vector2Int> directions = GetFreeDirection(pos, map, ref ways);
+            int costWay = ways[pos.y, pos.x];
+
+            foreach (Vector2Int direction in directions) {
+                ways[direction.y, direction.x] = costWay + 1;
+                cells.Enqueue(direction);
+                count++;
+            }
+
+            if (directions.Contains(endPoint)) {
+                break;
+            }
+        }
+
+        List<Vector2Int> trueWay = new List<Vector2Int>();
+        trueWay.Add(endPoint);
+        Vector2Int backPos = endPoint;
+
+        while (backPos != beginPoint) {
+            Vector2Int newPos = GetMinCellForWay(backPos, map, ways);       // can be fail!
+            if(newPos == backPos) {
+                Debug.Log("Not found way");
+                return null;
+            }
+            trueWay.Add(newPos);
+            backPos = newPos;
+        }
+
+        return trueWay;
+    }
+
+    private static List<Vector2Int> GetFreeDirection(Vector2Int pos, Cell[,] map, ref int[,] ways)
+    {
+        List<Vector2Int> directions = new List<Vector2Int>();
+
+        for (int y = pos.y - 1; y <= pos.y + 1; y++) {
+            for (int x = pos.x - 1; x <= pos.x + 1; x++) {
+                if (x >= 0 && y >= 0 && x < ways.GetLength(1) && y < ways.GetLength(0)) {
+                    if ((x == pos.x && y != pos.y) || (y == pos.y && x != pos.x)) {
+                        if (ways[y, x] == 0) {
+                            Vector2Int newPos = new Vector2Int(x, y);
+                            TypeDir dir = Cell.ConvertFromVector(newPos - pos);
+                            if (map[pos.y, pos.x].GetWall(dir) == 0) {
+                                directions.Add(newPos);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return directions;
+    }
+
+    private static Vector2Int GetMinCellForWay(Vector2Int pos, Cell[,] map, int[,] ways)
+    {
+        Vector2Int minPos = pos;
+
+        for (int y = pos.y - 1; y <= pos.y + 1; y++) {
+            for (int x = pos.x - 1; x <= pos.x + 1; x++) {
+                if (x >= 0 && y >= 0 && x < ways.GetLength(1) && y < ways.GetLength(0)) {
+                    if ((x == pos.x && y != pos.y) || (y == pos.y && x != pos.x)) {
+                        Vector2Int newPos = new Vector2Int(x, y);
+                        TypeDir dir = Cell.ConvertFromVector(newPos - pos);
+                        if (map[pos.y, pos.x].GetWall(dir) == 0) {
+                            if (ways[y, x] < ways[minPos.y, minPos.x]) {
+                                return new Vector2Int(x, y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return minPos;
+    }
+    #endregion
 }

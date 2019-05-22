@@ -98,5 +98,6 @@ MonoBehaviour:
     type: 3}
   playerPref: {fileID: 5571232037950712330, guid: 3d7666ab22608384bb344b3ec4c5509a,
     type: 3}
-  other: {fileID: 0}
+  victoryPref: {fileID: 3930987458387990524, guid: 35c2ad6366ba02b4fb8535103af7dc0a,
+    type: 3}
   id: 0

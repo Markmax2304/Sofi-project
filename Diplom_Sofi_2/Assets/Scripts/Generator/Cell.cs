@@ -54,4 +54,23 @@ public class Cell
     {
         CloseTile.gameObject.SetActive(false);
     }
+
+    public static TypeDir ConvertFromVector(Vector2Int dir)
+    {
+        if(dir == Vector2Int.up) {
+            return TypeDir.Top;
+        }
+        else if (dir == Vector2Int.down) {
+            return TypeDir.Below;
+        }
+        else if (dir == Vector2Int.right) {
+            return TypeDir.Right;
+        }
+        else if (dir == Vector2Int.left) {
+            return TypeDir.Left;
+        }
+        else {
+            return TypeDir.None;
+        }
+    }
 }
