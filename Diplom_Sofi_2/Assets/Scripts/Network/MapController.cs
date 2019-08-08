@@ -173,6 +173,9 @@ public class MapController : NetworkBehaviour
 
         //vizualize
         List<Vector2Int> way = MazeGenerator.CalculateTrueWayInMaze(Map, beginPoint, endPoint);
+        if (way == null)
+            return;
+
         for(int i = 0; i < way.Count - 1; i++) {
             Cell begin = Map[way[i].y, way[i].x];
             Cell end = Map[way[i + 1].y, way[i + 1].x];
